@@ -387,13 +387,15 @@ HTMLWidgets.widget({
               }
               
              var t = setTimeout(function() {
-               Shiny.onInputChange(el.id + '_hover', d.name);
+               if (window.Shiny){
+                 Shiny.onInputChange(el.id + '_hover', d.name);
+               }
              }, 1000);
-             $(this).data('timeout', t);
+             this.data_timeout = t;
 
             })
             .on("mouseout", function(d,i) {
-              clearTimeout($(this).data('timeout')); // Clear hover timeout when the mouse leaves the node
+              clearTimeout(this.data_timeout); // Clear hover timeout when the mouse leaves the node
 
               if (d.inactive) return;
               if (options.highlightChildLinks) {
@@ -403,10 +405,14 @@ HTMLWidgets.widget({
               }
             })
             .on("click", function(d) {
-               Shiny.onInputChange(el.id + '_clicked', d.name);
+              if (window.Shiny){
+                 Shiny.onInputChange(el.id + '_clicked', d.name);
+              }
             })
             .on("dblclick", function(d) {
-               Shiny.onInputChange(el.id + '_clicked', d.name);
+               if (window.Shiny){
+                  Shiny.onInputChange(el.id + '_clicked', d.name);
+               }
                if (!options.doubleclickTogglesChildren) {
                  return;
                }
