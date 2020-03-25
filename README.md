@@ -10,10 +10,10 @@ Based on [networkD3](https://github.com/christophergandrud/networkD3) and [d3-sa
 ```R
 # Installation
 # install.packages('devtools')
-devtools::install_github("fbreitwieser/sankeyD3")
+devtools::install_github("datastorm-open/sankeyD3")
 
 # Run example site directly from Github
-shiny::runGitHub("fbreitwieser/sankeyD3", subdir="inst/examples/shiny")
+shiny::runGitHub("datastorm/sankeyD3", subdir="inst/examples/shiny")
 
 ## Run it locally
 library(sankeyD3)
