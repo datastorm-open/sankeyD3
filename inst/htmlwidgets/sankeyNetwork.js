@@ -488,11 +488,12 @@ HTMLWidgets.widget({
         node = newNode.merge(node);
         
         // note: u2192 is right-arrow
-        link.append("title")
+        link.append("svg:title")
             .text(function(d) { 
                 return d.source.name + " \u2192 " + d.target.name +
-                " \r\n\n" + format(d.labelValue) + " " + options.units; });
+                " \r\n" + format(d.labelValue) + " " + options.units; });
 
+        
         node
             .append("rect")
             .attr("height", function(d) { return d.dy; })
@@ -514,11 +515,10 @@ HTMLWidgets.widget({
 			.style("filter", function(d) {
                 if (options.nodeShadow) { return( "url(#drop-shadow)");  } } )
             .append("title")
-            .attr("data-html", "true")
             .attr("class", "tooltip")
             .attr("title", function(d) { return format(d.labelValue); })
             .text(function(d) { 
-                return d.name + "<br />" + format(d.labelValue) + 
+                return d.name + " \r\n" + format(d.labelValue) + 
                 " " + options.units; });
 
         node
