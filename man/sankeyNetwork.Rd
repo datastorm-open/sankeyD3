@@ -220,9 +220,11 @@ sankeyNetwork(Links = energy$links, Nodes = energy$nodes, Source = 'source',
              Target = 'target', Value = 'value', NodeID = 'name',
              LinkGroup = 'energy_type', NodeGroup = NULL)
 
-# Plot
+# labelValue
+energy$links$value_print <- energy$links$value * 10
 sankeyNetwork(Links = energy$links, Nodes = energy$nodes, Source = 'source',
-             Target = 'target', Value = 'value', NodeID = 'name',
+             Target = 'target', Value = 'value', 
+             labelValue = "value_print", NodeID = 'name',
              units = 'TWh', fontSize = 12, nodeWidth = 30)
              
 }
