@@ -86,13 +86,13 @@ HTMLWidgets.widget({
           } else if (options.linkGradient) {
             return "url(#linearLinkGradient)";
           } else {
-            return  "#CCCCCC";
+            return  options.linkColor;
           }
         }
 
         var animation_duration = 50;
         var opacity_node = 1;
-        var opacity_link_plus = 0.45;
+        //var opacity_link_plus = 0.45;
         
         var opacity_link = function opacity_link(d) {
           if (d.inactive) {
@@ -105,6 +105,17 @@ HTMLWidgets.widget({
           }
         }
 
+        var opacity_link_plus = function opacity_link_plus(d) {
+          if (d.inactive) {
+            return 0;
+          }
+          if (d.group){
+            return options.linkOpacityHover;
+          } else {
+            return options.linkOpacityHover;
+          }
+        }
+        
         format = function(d) { 
           if (options.numberFormat == "pavian") {
             var formated_num;
@@ -325,8 +336,8 @@ HTMLWidgets.widget({
                 sel = link.filter(function(d1, i) { return(d == d1 || is_child(d.target, d1)); } )
               }
               sel
-                .style("stroke-opacity", function(d){return opacity_link(d) + opacity_link_plus})
-                .style("fill-opacity", function(d){return opacity_link(d) + opacity_link_plus});
+                .style("stroke-opacity", function(d){return opacity_link_plus(d)})
+                .style("fill-opacity", function(d){return opacity_link_plus(d)});
             })
             .on("mouseout", function(d) {
               if (d.inactive) return;
@@ -382,8 +393,8 @@ HTMLWidgets.widget({
               
               if (options.highlightChildLinks) {
                   link.filter(function(d1, i) { return(is_child(d, d1)); } )
-                      .style("stroke-opacity", function(d){return opacity_link(d) + opacity_link_plus})
-                      .style("fill-opacity", function(d){return opacity_link(d) + opacity_link_plus});
+                      .style("stroke-opacity", function(d){return opacity_link_plus(d)})
+                      .style("fill-opacity", function(d){return opacity_link_plus(d)});
               }
               
              var t = setTimeout(function() {
@@ -480,7 +491,7 @@ HTMLWidgets.widget({
         link.append("title")
             .text(function(d) { 
                 return d.source.name + " \u2192 " + d.target.name +
-                " \r\n" + format(d.value) + " " + options.units; });
+                " \r\n\n" + format(d.labelValue) + " " + options.units; });
 
         node
             .append("rect")
@@ -503,10 +514,11 @@ HTMLWidgets.widget({
 			.style("filter", function(d) {
                 if (options.nodeShadow) { return( "url(#drop-shadow)");  } } )
             .append("title")
+            .attr("data-html", "true")
             .attr("class", "tooltip")
-            .attr("title", function(d) { return format(d.value); })
+            .attr("title", function(d) { return format(d.labelValue); })
             .text(function(d) { 
-                return d.name + " \r\n" + format(d.value) + 
+                return d.name + "<br />" + format(d.labelValue) + 
                 " " + options.units; });
 
         node
@@ -546,7 +558,7 @@ HTMLWidgets.widget({
             .attr("dy", "-" + (options.nodeStrokeWidth/2 + 1 ) + "px")
             .attr("transform", null)
             .attr("class", "node-number")
-            .text(function(d) { return format(d.value); })
+            .text(function(d) { return format(d.labelValue); })
             .style("cursor", "move")
             .style("fill", function(d) {
               if (d.fontColor) {

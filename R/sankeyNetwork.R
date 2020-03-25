@@ -48,6 +48,8 @@ NULL
 #' data frame. Must be 0-indexed.
 #' @param NodeGroup character string specifying the node groups in the
 #' \code{Nodes}. Used to color the nodes in the network.
+#' @param labelValue \code{Value} is used to defined size. \code{labelValue} can be
+#' used to print another value in tooltip
 #' @param LinkGroup character string specifying the groups in the
 #' \code{Links}. Used to color the links in the network.
 #' @param NodePosX character specifying a column in the \code{Nodes} data
@@ -93,6 +95,7 @@ NULL
 #' @param nodeLabelMargin numeric margin between node and label.
 #' @param linkColor numeric Color of links.
 #' @param linkOpacity numeric Opacity of links.
+#' @param linkOpacityHover numeric Opacity of links when hover.
 #' @param linkGradient boolean Add a gradient to the links?
 #' @param dragX boolean Allow moving nodes along the x-axis?
 #' @param dragY boolean Allow moving nodes along the y-axis?
@@ -135,6 +138,13 @@ NULL
 #'              Target = 'target', Value = 'value', NodeID = 'name',
 #'              LinkGroup = 'energy_type', NodeGroup = NULL)
 #'
+#' # labelValue
+#' energy$links$value_print <- energy$links$value * 10
+#' sankeyNetwork(Links = energy$links, Nodes = energy$nodes, Source = 'source',
+#'              Target = 'target', Value = 'value', 
+#'              labelValue = "value_print", NodeID = 'name',
+#'              units = 'TWh', fontSize = 12, nodeWidth = 30)
+#'              
 #' }
 #' @source
 #' D3.js was created by Michael Bostock. See \url{http://d3js.org/} and, more
@@ -144,7 +154,8 @@ NULL
 #'
 #' @export
 sankeyNetwork <- function(Links, Nodes, Source, Target, Value, 
-    NodeID, NodeGroup = NodeID, LinkGroup = NULL, NodePosX = NULL, NodeValue = NULL,
+    NodeID, NodeGroup = NodeID, labelValue = Value, LinkGroup = NULL, 
+    NodePosX = NULL, NodeValue = NULL,
     NodeColor = NULL, NodeFontColor = NULL, NodeFontSize = NULL,
     units = "", colourScale = JS("d3.scaleOrdinal().range(d3.schemeCategory20)"), 
     fontSize = 7,  fontFamily = NULL, fontColor = NULL,
@@ -155,7 +166,8 @@ sankeyNetwork <- function(Links, Nodes, Source, Target, Value,
     dragX = FALSE, dragY = FALSE,
     height = NULL, width = NULL, iterations = 32, zoom = FALSE, align = "justify",
     showNodeValues = TRUE, linkType = "bezier", curvature = .5,  linkColor = "#A0A0A0",
-    nodeLabelMargin = 2, linkOpacity = .5, linkGradient = FALSE, nodeShadow = FALSE, 
+    nodeLabelMargin = 2, linkOpacity = .5, linkOpacityHover = 1,
+    linkGradient = FALSE, nodeShadow = FALSE, 
     scaleNodeBreadthsByString = FALSE, xScalingFactor = 1,
     yOrderComparator = NULL) 
 {
@@ -191,6 +203,9 @@ sankeyNetwork <- function(Links, Nodes, Source, Target, Value,
         LinksDF$value <- Links[, Value]
     }
     
+    LinksDF$labelValue <- Links[, labelValue]
+    
+    
     # if NodeID is missing assume NodeID is the first column
     if (missing(NodeID)) 
         NodeID = 1
@@ -207,6 +222,19 @@ sankeyNetwork <- function(Links, Nodes, Source, Target, Value,
 
     if (is.character(NodeValue)) {
         NodesDF$value <- Nodes[, NodeValue]
+        NodesDF$labelValue <- NodesDF$value
+    } else {
+      value_node_source <- aggregate(LinksDF$labelValue, by= list(LinksDF$source), "sum")
+      colnames(value_node_source) <- c("group", "source")
+      value_node_target <- aggregate(LinksDF$labelValue, by= list(LinksDF$target), "sum")
+      colnames(value_node_target) <- c("group", "target")
+      value_node <- merge(value_node_source, value_node_target, by = "group", all = T)
+      value_node$value <- value_node$source
+      value_node$value[is.na(value_node$source)] <- value_node$target[is.na(value_node$source)]
+      value_node$value[!is.na(value_node$source) & !is.na(value_node$target)] <- value_node$target[!is.na(value_node$source) & !is.na(value_node$target)]
+      value_node <- value_node$value[order(value_node$group)]
+      
+      NodesDF$labelValue <- value_node
     }
     
     if (is.character(NodeColor)) {
@@ -238,7 +266,8 @@ sankeyNetwork <- function(Links, Nodes, Source, Target, Value,
         highlightChildLinks = highlightChildLinks, doubleclickTogglesChildren = doubleclickTogglesChildren,
         showNodeValues = showNodeValues, align = align, xAxisDomain = xAxisDomain,
         title = title, nodeLabelMargin = nodeLabelMargin, 
-        linkColor = linkColor, linkOpacity = linkOpacity, linkGradient = linkGradient, nodeShadow = nodeShadow,
+        linkColor = linkColor, linkOpacity = linkOpacity, linkOpacityHover = linkOpacityHover, 
+        linkGradient = linkGradient, nodeShadow = nodeShadow,
         scaleNodeBreadthsByString = scaleNodeBreadthsByString, xScalingFactor = xScalingFactor,
         yOrderComparator = yOrderComparator)
     
