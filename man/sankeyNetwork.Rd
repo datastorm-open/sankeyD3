@@ -8,21 +8,57 @@ D3.js was created by Michael Bostock. See \url{http://d3js.org/} and, more
 specifically for Sankey diagrams \url{http://bost.ocks.org/mike/sankey/}.
 }
 \usage{
-sankeyNetwork(Links, Nodes, Source, Target, Value, NodeID, NodeGroup = NodeID,
-  LinkGroup = NULL, NodePosX = NULL, NodeValue = NULL, NodeColor = NULL,
-  NodeFontColor = NULL, NodeFontSize = NULL, units = "",
+sankeyNetwork(
+  Links,
+  Nodes,
+  Source,
+  Target,
+  Value,
+  NodeID,
+  NodeGroup = NodeID,
+  labelValue = Value,
+  LinkGroup = NULL,
+  NodePosX = NULL,
+  NodeValue = NULL,
+  NodeColor = NULL,
+  NodeFontColor = NULL,
+  NodeFontSize = NULL,
+  units = "",
   colourScale = JS("d3.scaleOrdinal().range(d3.schemeCategory20)"),
-  fontSize = 7, fontFamily = NULL, fontColor = NULL, nodeWidth = 15,
-  nodePadding = 10, nodeStrokeWidth = 1, nodeCornerRadius = 0,
-  margin = NULL, title = NULL, numberFormat = ",.5g",
-  orderByPath = FALSE, highlightChildLinks = FALSE,
-  doubleclickTogglesChildren = FALSE, xAxisDomain = NULL, dragX = FALSE,
-  dragY = FALSE, height = NULL, width = NULL, iterations = 32,
-  zoom = FALSE, align = "justify", showNodeValues = TRUE,
-  linkType = "bezier", curvature = 0.5, linkColor = "#A0A0A0",
-  nodeLabelMargin = 2, linkOpacity = 0.5, linkGradient = FALSE,
-  nodeShadow = FALSE, scaleNodeBreadthsByString = FALSE,
-  xScalingFactor = 1, yOrderComparator = NULL)
+  fontSize = 7,
+  fontFamily = NULL,
+  fontColor = NULL,
+  nodeWidth = 15,
+  nodePadding = 10,
+  nodeStrokeWidth = 1,
+  nodeCornerRadius = 0,
+  margin = NULL,
+  title = NULL,
+  numberFormat = ",.5g",
+  orderByPath = FALSE,
+  highlightChildLinks = FALSE,
+  doubleclickTogglesChildren = FALSE,
+  xAxisDomain = NULL,
+  dragX = FALSE,
+  dragY = FALSE,
+  height = NULL,
+  width = NULL,
+  iterations = 32,
+  zoom = FALSE,
+  align = "justify",
+  showNodeValues = TRUE,
+  linkType = "bezier",
+  curvature = 0.5,
+  linkColor = "#A0A0A0",
+  nodeLabelMargin = 2,
+  linkOpacity = 0.5,
+  linkOpacityHover = 1,
+  linkGradient = FALSE,
+  nodeShadow = FALSE,
+  scaleNodeBreadthsByString = FALSE,
+  xScalingFactor = 1,
+  yOrderComparator = NULL
+)
 }
 \arguments{
 \item{Links}{a data frame object with the links between the nodes. It should
@@ -49,6 +85,9 @@ data frame. Must be 0-indexed.}
 
 \item{NodeGroup}{character string specifying the node groups in the
 \code{Nodes}. Used to color the nodes in the network.}
+
+\item{labelValue}{\code{Value} is used to defined size. \code{labelValue} can be
+used to print another value in tooltip}
 
 \item{LinkGroup}{character string specifying the groups in the
 \code{Links}. Used to color the links in the network.}
@@ -143,6 +182,8 @@ If 'none', then the labels of the nodes are always to the right of the node.}
 
 \item{linkOpacity}{numeric Opacity of links.}
 
+\item{linkOpacityHover}{numeric Opacity of links when hover.}
+
 \item{linkGradient}{boolean Add a gradient to the links?}
 
 \item{nodeShadow}{boolean Add a shadow to the nodes?}
@@ -179,6 +220,11 @@ sankeyNetwork(Links = energy$links, Nodes = energy$nodes, Source = 'source',
              Target = 'target', Value = 'value', NodeID = 'name',
              LinkGroup = 'energy_type', NodeGroup = NULL)
 
+# Plot
+sankeyNetwork(Links = energy$links, Nodes = energy$nodes, Source = 'source',
+             Target = 'target', Value = 'value', NodeID = 'name',
+             units = 'TWh', fontSize = 12, nodeWidth = 30)
+             
 }
 }
 \seealso{
