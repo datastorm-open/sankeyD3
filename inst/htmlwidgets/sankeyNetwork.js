@@ -488,12 +488,17 @@ HTMLWidgets.widget({
         node = newNode.merge(node);
         
         // note: u2192 is right-arrow
-        link.append("svg:title")
+        /*link.append("svg:title")
             .text(function(d) { 
                 return d.source.name + " \u2192 " + d.target.name +
-                " \r\n" + format(d.labelValue) + " " + options.units; });
+                " \r\n" + format(d.labelValue) + " " + options.units; });*/
 
-        
+        link.append("title")
+            .append("foreignObject")
+            .append("xhtml:body")
+            .html(function(d) { return "<pre>" + d.source.name + " \u2192 " + d.target.name +
+                "\n" + format(d.labelValue) + " " + options.units + "</pre>"; });
+                
         node
             .append("rect")
             .attr("height", function(d) { return d.dy; })
@@ -514,12 +519,17 @@ HTMLWidgets.widget({
             .attr("ry", options.nodeCornerRadius)
 			.style("filter", function(d) {
                 if (options.nodeShadow) { return( "url(#drop-shadow)");  } } )
-            .append("title")
+            /*.append("title")
             .attr("class", "tooltip")
             .attr("title", function(d) { return format(d.labelValue); })
             .text(function(d) { 
                 return d.name + " \r\n" + format(d.labelValue) + 
-                " " + options.units; });
+                " " + options.units; });*/
+            .append("title")
+            .append("foreignObject")
+            .append("xhtml:body")
+            .html(function(d) { return "<pre>" + d.name + "\n" + format(d.labelValue) + 
+                " " + options.units + "</pre>"; });
 
         node
             .append("text")
