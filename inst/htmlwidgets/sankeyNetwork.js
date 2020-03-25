@@ -28,9 +28,9 @@ HTMLWidgets.widget({
         // with flexdashboard and slides
         //   sankey might be hidden so height and width 0
         //   in this instance re-render on resize
-        if( d3.min(instance.sankey.size()) <= 0 ) {
+        //if( d3.min(instance.sankey.size()) <= 0 ) {
           this.renderValue(el, instance.x, instance);
-        }
+        //}
     },
 
     renderValue: function(el, x, instance) {
