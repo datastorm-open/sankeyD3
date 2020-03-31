@@ -144,6 +144,17 @@ NULL
 #'              Target = 'target', Value = 'value', 
 #'              labelValue = "value_print", NodeID = 'name',
 #'              units = 'TWh', fontSize = 12, nodeWidth = 30)
+#'     
+#' # multiple labelValue with custom options        
+#' energy$links$log_size_value <- log(energy$links$value)
+#' energy$links$label_value_1 <- energy$links$value
+#' energy$links$label_value_2 <- sample(c(2, 5, 4), nrow(energy$links), replace = T)
+#' sankeyNetwork(Links = energy$links, Nodes = energy$nodes, Source = 'source',
+#'               Target = 'target', NodeID = 'name',Value = 'log_size_value', 
+#'               labelValue = c("label_value_1", "label_value_2"), 
+#'               units = c('TWh', "N"), # custom units
+#'               numberFormat = c(",.5g", ",.0r"), # custom format
+#'               fontSize = 12, nodeWidth = 30)
 #'              
 #' }
 #' @source
@@ -171,7 +182,8 @@ sankeyNetwork <- function(Links, Nodes, Source, Target, Value,
     scaleNodeBreadthsByString = FALSE, xScalingFactor = 1,
     yOrderComparator = NULL) 
 {
-    # Check if data is zero indexed
+ 
+   # Check if data is zero indexed
     check_zero(Links[, Source], Links[, Target])
     
     # Hack for UI consistency. Think of improving.
@@ -203,8 +215,12 @@ sankeyNetwork <- function(Links, Nodes, Source, Target, Value,
         LinksDF$value <- Links[, Value]
     }
     
-    LinksDF$labelValue <- Links[, labelValue]
-    
+    if(length(labelValue) == 1 && !missing(Value) && labelValue == Value){
+      LinksDF$labelValue <- Links[, labelValue]
+      labelValue <- "labelValue"
+    } else {
+      LinksDF <- cbind.data.frame(LinksDF, Links[, labelValue, drop = FALSE])
+    }
     
     # if NodeID is missing assume NodeID is the first column
     if (missing(NodeID)) 
@@ -223,18 +239,21 @@ sankeyNetwork <- function(Links, Nodes, Source, Target, Value,
     if (is.character(NodeValue)) {
         NodesDF$value <- Nodes[, NodeValue]
         NodesDF$labelValue <- NodesDF$value
+        labelValue_nodes <- "labelValue"
     } else {
-      value_node_source <- aggregate(LinksDF$labelValue, by= list(LinksDF$source), "sum")
-      colnames(value_node_source) <- c("group", "source")
-      value_node_target <- aggregate(LinksDF$labelValue, by= list(LinksDF$target), "sum")
-      colnames(value_node_target) <- c("group", "target")
-      value_node <- merge(value_node_source, value_node_target, by = "group", all = T)
-      value_node$value <- value_node$source
-      value_node$value[is.na(value_node$source)] <- value_node$target[is.na(value_node$source)]
-      value_node$value[!is.na(value_node$source) & !is.na(value_node$target)] <- value_node$target[!is.na(value_node$source) & !is.na(value_node$target)]
-      value_node <- value_node$value[order(value_node$group)]
-      
-      NodesDF$labelValue <- value_node
+      for(v in labelValue){
+        value_node_source <- aggregate(LinksDF[[v]], by= list(LinksDF$source), "sum")
+        colnames(value_node_source) <- c("group", "source")
+        value_node_target <- aggregate(LinksDF[[v]], by= list(LinksDF$target), "sum")
+        colnames(value_node_target) <- c("group", "target")
+        value_node <- merge(value_node_source, value_node_target, by = "group", all = T)
+        value_node$value <- pmax(value_node$source, value_node$target,  na.rm = TRUE)
+        value_node <- value_node$value[order(value_node$group)]
+        
+        NodesDF[[v]] <- value_node
+      }
+
+      labelValue_nodes <- labelValue
     }
     
     if (is.character(NodeColor)) {
@@ -253,8 +272,21 @@ sankeyNetwork <- function(Links, Nodes, Source, Target, Value,
         LinksDF$group <- Links[, LinkGroup]
     }
 
+    if(length(labelValue) != length(units)){
+      units <- rep(units, length = length(labelValue))
+    }
+    
+    if(length(labelValue) != length(numberFormat)){
+      numberFormat <- rep(numberFormat, length = length(labelValue))
+    }
+    
     margin <- margin_handler(margin)
     
+    if(length(labelValue_nodes) == 1) labelValue_nodes <- list(labelValue_nodes)
+    if(length(labelValue) == 1) labelValue <- list(labelValue)
+    if(length(units) == 1) units <- list(units)
+    if(length(numberFormat) == 1) numberFormat <- list(numberFormat)
+
     # create options
     options = list(NodeID = NodeID, NodeGroup = NodeGroup, LinkGroup = LinkGroup, 
         colourScale = colourScale, fontSize = fontSize, fontFamily = fontFamily, fontColor = fontColor,
@@ -269,7 +301,8 @@ sankeyNetwork <- function(Links, Nodes, Source, Target, Value,
         linkColor = linkColor, linkOpacity = linkOpacity, linkOpacityHover = linkOpacityHover, 
         linkGradient = linkGradient, nodeShadow = nodeShadow,
         scaleNodeBreadthsByString = scaleNodeBreadthsByString, xScalingFactor = xScalingFactor,
-        yOrderComparator = yOrderComparator)
+        yOrderComparator = yOrderComparator, labelValue_nodes = labelValue_nodes, 
+        labelValue_links = labelValue)
     
     # create widget
     htmlwidgets::createWidget(name = "sankeyNetwork", x = list(links = LinksDF, 

@@ -226,6 +226,17 @@ sankeyNetwork(Links = energy$links, Nodes = energy$nodes, Source = 'source',
              Target = 'target', Value = 'value', 
              labelValue = "value_print", NodeID = 'name',
              units = 'TWh', fontSize = 12, nodeWidth = 30)
+    
+# multiple labelValue with custom options        
+energy$links$log_size_value <- log(energy$links$value)
+energy$links$label_value_1 <- energy$links$value
+energy$links$label_value_2 <- sample(c(2, 5, 4), nrow(energy$links), replace = T)
+sankeyNetwork(Links = energy$links, Nodes = energy$nodes, Source = 'source',
+              Target = 'target', NodeID = 'name',Value = 'log_size_value', 
+              labelValue = c("label_value_1", "label_value_2"), 
+              units = c('TWh', "N"), # custom units
+              numberFormat = c(",.5g", ",.0r"), # custom format
+              fontSize = 12, nodeWidth = 30)
              
 }
 }

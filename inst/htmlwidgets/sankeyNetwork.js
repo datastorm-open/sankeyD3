@@ -116,8 +116,8 @@ HTMLWidgets.widget({
           }
         }
         
-        format = function(d) { 
-          if (options.numberFormat == "pavian") {
+        format = function(d, i) { 
+          if (options.numberFormat[i] == "pavian") {
             var formated_num;
             if (d > 1000) {
               formated_num = d3.format(".3s")(d);
@@ -138,7 +138,7 @@ HTMLWidgets.widget({
             }
             
           } else {
-            formated_num = d3.format(options.numberFormat)(d);
+            formated_num = d3.format(options.numberFormat[i])(d);
           }
           return formated_num;
         }
@@ -496,8 +496,18 @@ HTMLWidgets.widget({
         link.append("title")
             .append("foreignObject")
             .append("xhtml:body")
-            .html(function(d) { return "<pre>" + d.source.name + " \u2192 " + d.target.name +
-                "\n" + format(d.labelValue) + " " + options.units + "</pre>"; });
+            /*.html(function(d) { return "<pre>" + d.source.name + " \u2192 " + d.target.name +
+                "\n" + format(d.labelValue) + " " + options.units + "</pre>"; });*/
+            .html(function(d) { 
+              var link_tile = "<pre>" + d.source.name + " \u2192 " + d.target.name ;
+              if(options.labelValue_links !== undefined){
+                for (var i = 0; i < options.labelValue_links.length; i++) {
+                  link_tile = link_tile + "\n" + format(d[options.labelValue_links[i]], i) + 
+                " " + options.units[i]
+                }
+              }
+              return link_tile + "</pre>";
+            });
                 
         node
             .append("rect")
@@ -528,8 +538,18 @@ HTMLWidgets.widget({
             .append("title")
             .append("foreignObject")
             .append("xhtml:body")
-            .html(function(d) { return "<pre>" + d.name + "\n" + format(d.labelValue) + 
-                " " + options.units + "</pre>"; });
+            /*.html(function(d) { return "<pre>" + d.name + "\n" + format(d.labelValue) + 
+                " " + options.units + "</pre>"; });*/
+            .html(function(d) { 
+              var node_tile = "<pre>" + d.name;
+              if(options.labelValue_nodes !== undefined){
+                for (var i = 0; i < options.labelValue_nodes.length; i++) {
+                  node_tile = node_tile + "\n" + format(d[options.labelValue_nodes[i]], i) + 
+                " " + options.units[i]
+                }
+              }
+              return node_tile + "</pre>";
+            });
 
         node
             .append("text")
@@ -568,7 +588,7 @@ HTMLWidgets.widget({
             .attr("dy", "-" + (options.nodeStrokeWidth/2 + 1 ) + "px")
             .attr("transform", null)
             .attr("class", "node-number")
-            .text(function(d) { return format(d.labelValue); })
+            .text(function(d) { return format(d[options.labelValue_nodes[0]], 0); })
             .style("cursor", "move")
             .style("fill", function(d) {
               if (d.fontColor) {
