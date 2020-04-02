@@ -241,6 +241,7 @@ sankeyNetwork <- function(Links, Nodes, Source, Target, Value,
         NodesDF$labelValue <- NodesDF$value
         labelValue_nodes <- "labelValue"
     } else {
+      NodesDF$`_tmp_gr` <- 1:nrow(NodesDF)-1
       for(v in labelValue){
         value_node_source <- aggregate(LinksDF[[v]], by= list(LinksDF$source), "sum")
         colnames(value_node_source) <- c("group", "source")
@@ -248,11 +249,15 @@ sankeyNetwork <- function(Links, Nodes, Source, Target, Value,
         colnames(value_node_target) <- c("group", "target")
         value_node <- merge(value_node_source, value_node_target, by = "group", all = T)
         value_node$value <- pmax(value_node$source, value_node$target,  na.rm = TRUE)
-        value_node <- value_node$value[order(value_node$group)]
         
-        NodesDF[[v]] <- value_node
+        value_node_merge <- value_node[, c("group", "value")]
+        colnames(value_node_merge) <- c("_tmp_gr", v)
+        
+        NodesDF <- merge(NodesDF, value_node_merge, all.x = TRUE, sort = FALSE)
       }
-
+  
+      NodesDF <- NodesDF[order(NodesDF$`_tmp_gr`), ]
+      NodesDF$`_tmp_gr` <- NULL
       labelValue_nodes <- labelValue
     }
     
